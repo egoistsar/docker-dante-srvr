@@ -64,8 +64,19 @@ for pkg in "${DEPS[@]}"; do
 done
 
 # --- DOCKER ---
+echo "🔄 Проверка и запуск Docker..."
 systemctl enable docker
 systemctl start docker
+sleep 2
+if ! docker info >/dev/null 2>&1; then
+  echo "⚠️ Docker демон не запущен. Пробую перезапустить..."
+  systemctl restart docker
+  sleep 2
+  if ! docker info >/dev/null 2>&1; then
+    echo "❌ Не удалось запустить Docker. Проверьте вручную."
+    exit 1
+  fi
+fi
 
 # --- КЛОНИРОВАНИЕ ---
 if [ ! -d "docker-dante-srvr" ]; then
