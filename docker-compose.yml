@@ -1,9 +1,9 @@
-version: '3.8'
-
+version: '3.7'
 services:
-  dante-proxy:
+  dante:
     build: .
     container_name: socks5
     network_mode: host
-    env_file: config.env
     restart: always
+    env_file:
+      - config.env

@@ -1,6 +1,6 @@
 [Unit]
-Description=Dante SOCKS5 Proxy (Docker)
-After=docker.service
+Description=Dante Docker Container
+After=network.target docker.service
 Requires=docker.service
 
 [Service]

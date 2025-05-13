@@ -2,7 +2,6 @@ FROM debian:bullseye
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Установка необходимых пакетов: dante, envsubst, iproute2
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     dante-server \
