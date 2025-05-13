@@ -1,4 +1,3 @@
-### install.sh
 #!/bin/bash
 
 set -e
@@ -6,26 +5,11 @@ set -e
 # --- ПАРСИНГ АРГУМЕНТОВ ---
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    --port)
-      PORT="$2"
-      shift 2
-      ;;
-    --user)
-      USERNAME="$2"
-      shift 2
-      ;;
-    --pass)
-      PASSWORD="$2"
-      shift 2
-      ;;
-    --env-file)
-      ENV_FILE="$2"
-      shift 2
-      ;;
-    *)
-      echo "❌ Неизвестный параметр: $1"
-      exit 1
-      ;;
+    --port) PORT="$2"; shift 2 ;;
+    --user) USERNAME="$2"; shift 2 ;;
+    --pass) PASSWORD="$2"; shift 2 ;;
+    --env-file) ENV_FILE="$2"; shift 2 ;;
+    *) echo "❌ Неизвестный параметр: $1"; exit 1 ;;
   esac
 done
 
@@ -41,8 +25,8 @@ if [[ -n "$ENV_FILE" ]]; then
 fi
 
 # --- ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ ПЕРЕМЕННЫХ ---
-: "${PORT:?❌ Не указана переменная --port}" 
-: "${USERNAME:?❌ Не указана переменная --user}" 
+: "${PORT:?❌ Не указана переменная --port}"
+: "${USERNAME:?❌ Не указана переменная --user}"
 : "${PASSWORD:?❌ Не указана переменная --pass}"
 
 # --- ПРОВЕРКА ROOT ---
@@ -88,6 +72,10 @@ if ! docker info >/dev/null 2>&1; then
   fi
 fi
 
+# --- ДОП. ИНФОРМАЦИЯ ---
+echo "🧩 Версия Docker: $(docker --version)"
+echo "🌐 IP интерфейс VPS: $(hostname -I | awk '{print $1}')"
+
 # --- КЛОНИРОВАНИЕ РЕПОЗИТОРИЯ ---
 if [ ! -d "docker-dante-srvr" ]; then
   git clone https://github.com/egoistsar/docker-dante-srvr.git
@@ -124,8 +112,26 @@ systemctl daemon-reexec
 systemctl enable dante-docker
 systemctl start dante-docker
 
-# --- ГОТОВО ---
+# --- ФИНАЛЬНАЯ ПРОВЕРКА ---
+echo -e "\n📋 Проверка состояния SOCKS5-сервера..."
+echo "--------------------------------------"
+echo "🔎 Контейнер socks5:"
+docker ps -f name=socks5 --format "   ▸ {{.Status}}"
+echo
+
+echo "📡 Проверка слушания порта $PORT:"
+if ss -tnlp | grep -q ":$PORT"; then
+  echo "   ✅ Порт $PORT слушается"
+else
+  echo "   ❌ Порт $PORT не слушается"
+fi
+echo
+
+echo "📄 Последние строки из логов socks5:"
+docker logs --tail 10 socks5 | sed 's/^/   /'
+echo "--------------------------------------"
 echo -e "\n✅ Установка завершена"
 echo "🟢 Прокси работает на порту: $PORT"
 echo "🔐 Логин: $USERNAME"
+echo "🔐 Пароль: $PASSWORD"
 echo "📦 Контейнер: socks5"
