@@ -36,7 +36,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # --- УСТАНОВКА ЗАВИСИМОСТЕЙ ---
-DEPS=(curl git docker.io sudo iptables systemd systemd-sysv net-tools apparmor-utils apparmor apparmor_parser)
+DEPS=(curl git docker.io sudo iptables systemd systemd-sysv net-tools apparmor-utils apparmor)
 echo "🔧 Проверка и установка зависимостей..."
 for pkg in "${DEPS[@]}"; do
   if ! dpkg -s "$pkg" >/dev/null 2>&1; then
