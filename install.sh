@@ -1,3 +1,4 @@
+### install.sh
 #!/bin/bash
 
 set -e
@@ -40,8 +41,8 @@ if [[ -n "$ENV_FILE" ]]; then
 fi
 
 # --- ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ ПЕРЕМЕННЫХ ---
-: "${PORT:?❌ Не указана переменная --port}"
-: "${USERNAME:?❌ Не указана переменная --user}"
+: "${PORT:?❌ Не указана переменная --port}" 
+: "${USERNAME:?❌ Не указана переменная --user}" 
 : "${PASSWORD:?❌ Не указана переменная --pass}"
 
 # --- ПРОВЕРКА ROOT ---
@@ -74,8 +75,16 @@ if ! docker info >/dev/null 2>&1; then
   systemctl restart docker
   sleep 5
   if ! docker info >/dev/null 2>&1; then
-    echo "🚫 Не удалось запустить Docker даже после перезапуска. Завершаем."
-    exit 1
+    echo "🚫 Не удалось запустить Docker. Переустанавливаю..."
+    apt purge -y docker.io containerd runc
+    apt update && apt install -y docker.io
+    systemctl restart docker
+    sleep 5
+    if ! docker info >/dev/null 2>&1; then
+      echo "❌ Docker всё ещё не запускается. Вот журнал ошибок:"
+      journalctl -u docker --no-pager | tail -n 30
+      exit 1
+    fi
   fi
 fi
 
@@ -98,18 +107,6 @@ echo "📡 Проброс порта через iptables: $PORT"
 iptables -I INPUT -p tcp --dport "$PORT" -j ACCEPT || {
   echo "⚠️ Не удалось открыть порт. Возможно, iptables отключен или уже добавлено правило."
 }
-
-# --- ЕЩЁ РАЗ ПРОВЕРКА DOCKER ПЕРЕД СБОРКОЙ ---
-echo "🔍 Проверка docker.sock перед сборкой..."
-if ! docker info >/dev/null 2>&1; then
-  echo "❌ Docker демон снова не запущен. Пробуем ещё раз..."
-  systemctl restart docker
-  sleep 5
-  if ! docker info >/dev/null 2>&1; then
-    echo "🚫 Не удалось запустить Docker. Завершаем."
-    exit 1
-  fi
-fi
 
 # --- СБОРКА ---
 echo "🐳 Сборка Docker-образа..."
