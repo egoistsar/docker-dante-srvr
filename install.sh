@@ -114,6 +114,7 @@ docker run -d \
   --restart=always \
   --network host \
   --env-file=config.env \
+  --security-opt apparmor=unconfined \
   --name socks5 \
   dante-proxy-auto
 
