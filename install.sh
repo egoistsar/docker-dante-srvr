@@ -1,18 +1,59 @@
+### install.sh
 #!/bin/bash
 
 set -e
 
-echo "\U0001F300 Установка Dante SOCKS5 через Docker с автозапуском и пробросом порта"
+# --- ПАРСИНГ АРГУМЕНТОВ ---
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --port)
+      PORT="$2"
+      shift 2
+      ;;
+    --user)
+      USERNAME="$2"
+      shift 2
+      ;;
+    --pass)
+      PASSWORD="$2"
+      shift 2
+      ;;
+    --env-file)
+      ENV_FILE="$2"
+      shift 2
+      ;;
+    *)
+      echo "❌ Неизвестный параметр: $1"
+      exit 1
+      ;;
+  esac
+done
 
-# Проверка root-доступа
+# --- ПОДГРУЗКА .env ФАЙЛА ЕСЛИ УКАЗАН ---
+if [[ -n "$ENV_FILE" ]]; then
+  if [[ -f "$ENV_FILE" ]]; then
+    echo "📄 Загружаю переменные из $ENV_FILE"
+    export $(grep -v '^#' "$ENV_FILE" | xargs)
+  else
+    echo "❌ Файл $ENV_FILE не найден"
+    exit 1
+  fi
+fi
+
+# --- ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ ПЕРЕМЕННЫХ ---
+: "${PORT:?❌ Не указана переменная --port}" 
+: "${USERNAME:?❌ Не указана переменная --user}" 
+: "${PASSWORD:?❌ Не указана переменная --pass}"
+
+# --- ПРОВЕРКА ROOT ---
 if [[ $EUID -ne 0 ]]; then
   echo "❌ Этот скрипт нужно запускать от root"
   exit 1
 fi
 
-# Установка зависимостей
+# --- УСТАНОВКА ЗАВИСИМОСТЕЙ ---
 DEPS=(curl git docker.io sudo iptables systemd systemd-sysv net-tools)
-echo "\U0001F527 Проверка и установка зависимостей..."
+echo "🔧 Проверка и установка зависимостей..."
 for pkg in "${DEPS[@]}"; do
   if ! dpkg -s "$pkg" >/dev/null 2>&1; then
     echo "📦 Устанавливаю: $pkg"
@@ -22,47 +63,48 @@ for pkg in "${DEPS[@]}"; do
   fi
 done
 
-# Запуск Docker
+# --- DOCKER ---
 systemctl enable docker
 systemctl start docker
 
-# Клонирование репозитория
+# --- КЛОНИРОВАНИЕ ---
 if [ ! -d "docker-dante-srvr" ]; then
   git clone https://github.com/egoistsar/docker-dante-srvr.git
 fi
 cd docker-dante-srvr || exit 1
 
-# Сбор данных от пользователя
-read -t 60 -p "🛠 Введите порт для прокси-сервера: " PORT || { echo -e "\n⏰ Время вышло"; exit 1; }
-read -t 60 -p "👤 Введите логин: " USERNAME || { echo -e "\n⏰ Время вышло"; exit 1; }
-read -t 60 -s -p "🔑 Введите пароль: " PASSWORD || { echo -e "\n⏰ Время вышло"; exit 1; }
-echo
-
-# Сохранение в env-файл
+# --- СОХРАНЕНИЕ config.env ---
+echo "💾 Создаю config.env..."
 cat <<EOF > config.env
 PORT=$PORT
 USERNAME=$USERNAME
 PASSWORD=$PASSWORD
 EOF
 
-# Разрешение через iptables
-iptables -I INPUT -p tcp --dport "$PORT" -j ACCEPT || echo "⚠️ Не удалось открыть порт через iptables. Проверьте вручную."
+# --- IPTABLES ---
+echo "📡 Проброс порта через iptables: $PORT"
+iptables -I INPUT -p tcp --dport "$PORT" -j ACCEPT || {
+  echo "⚠️ Не удалось открыть порт. Возможно, iptables отключен или уже добавлено правило."
+}
 
-# Сборка образа
+# --- СБОРКА ---
+echo "🐳 Сборка Docker-образа..."
 docker build -t dante-proxy-auto .
 
-# Запуск контейнера
+# --- ЗАПУСК ---
+echo "🚀 Запуск контейнера socks5..."
 docker rm -f socks5 2>/dev/null || true
 docker run -d --restart=always --network host --env-file=config.env --name socks5 dante-proxy-auto
 
-# Установка systemd-сервиса
+# --- SYSTEMD ---
+echo "🛠 Установка systemd-сервиса..."
 cp dante-docker.service /etc/systemd/system/
 systemctl daemon-reexec
 systemctl enable dante-docker
 systemctl start dante-docker
 
-echo "\n✅ Установка завершена"
-echo "🟢 Прокси доступен на порту: $PORT"
-echo "Логин: $USERNAME"
-echo "Пароль: $PASSWORD"
-echo "Контейнер: socks5 (автозапуск через systemd)"
+# --- ГОТОВО ---
+echo -e "\n✅ Установка завершена"
+echo "🟢 Прокси работает на порту: $PORT"
+echo "🔐 Логин: $USERNAME"
+echo "📦 Контейнер: socks5"
