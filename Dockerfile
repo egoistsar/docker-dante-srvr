@@ -1,14 +1,15 @@
 FROM debian:bullseye
 
-# Устанавливаем необходимые пакеты: dante-server, iproute2 (для ip), gettext-base (для envsubst)
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Установка необходимых пакетов
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     dante-server \
-    iproute2 \
-    gettext-base && \
+    gettext-base \
+    iproute2 && \
     rm -rf /var/lib/apt/lists/*
 
-# Копируем скрипт и шаблон
 COPY entrypoint.sh /entrypoint.sh
 COPY danted.conf.template /etc/danted.conf.template
 
