@@ -7,3 +7,5 @@ services:
     restart: always
     env_file:
       - config.env
+    security_opt:
+      - apparmor=unconfined
