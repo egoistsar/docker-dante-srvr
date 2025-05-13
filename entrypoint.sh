@@ -1,20 +1,14 @@
 #!/bin/bash
 
-echo "🔧 Настройка SOCKS5 прокси-сервера Dante"
+# Получение значений из ENV
+PORT=${PORT:-1080}
+USERNAME=${USERNAME:-proxy}
+PASSWORD=${PASSWORD:-123456}
 
-read -p "🛠 Введите порт для сервера: " PORT
-read -p "👤 Введите имя пользователя: " USERNAME
-read -s -p "🔑 Введите пароль: " PASSWORD
-echo
+echo "🔧 Запуск Dante SOCKS5 на порту $PORT для пользователя $USERNAME"
 
-# Создание системного пользователя
 useradd -m "$USERNAME"
 echo "$USERNAME:$PASSWORD" | chpasswd
 
-# Генерация конфига
-export PORT
 envsubst < /etc/danted.conf.template > /etc/danted.conf
-
-echo "✅ Конфиг создан. Запуск Dante..."
-
 exec danted -f /etc/danted.conf
