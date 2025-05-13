@@ -1,9 +1,7 @@
 FROM debian:bullseye
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends dante-server gettext-base && \
+    apt-get install -y dante-server iproute2 gettext-base && \
     rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh
