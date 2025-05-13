@@ -24,7 +24,7 @@ systemctl reset-failed
 
 # 3. Удаление установленных пакетов
 echo "📦 Удаляю установленные пакеты..."
-apt purge -y git docker.io sudo iptables net-tools apparmor-utils || true
+apt purge -y git docker.io sudo iptables net-tools apparmor-utils apparmor apparmor_parser|| true
 apt autoremove -y
 
 echo "✅ Очистка завершена успешно"
