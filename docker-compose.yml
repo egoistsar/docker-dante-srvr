@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  dante:
+    build: .
+    container_name: socks5-proxy
+    network_mode: "host"
+    stdin_open: true
+    tty: true
