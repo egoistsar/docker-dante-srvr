@@ -31,7 +31,7 @@ docker logs socks5 --tail 10
 curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/cleanup.sh | bash
 
 или
-apt purge -y curl git docker.io sudo iptables net-tools && apt autoremove -y
+apt purge -y git docker.io sudo iptables net-tools && apt autoremove -y
 rm -rf /var/lib/docker /etc/systemd/system/docker.service.d
 
 
@@ -99,7 +99,7 @@ curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/cle
 
 or
 
-apt purge -y curl git docker.io sudo iptables net-tools && apt autoremove -y
+apt purge -y git docker.io sudo iptables net-tools && apt autoremove -y
 rm -rf /var/lib/docker /etc/systemd/system/docker.service.d
 
 
