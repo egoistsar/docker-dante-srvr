@@ -2,37 +2,64 @@
 
 set -e
 
-echo "🌀 Установка Dante SOCKS5 через Docker"
+echo "🌀 Установка Dante SOCKS5 через Docker с автозапуском"
 
-# 1. Установка Docker
-if ! command -v docker >/dev/null 2>&1; then
-  echo "🔧 Устанавливаю Docker..."
-  apt update && apt install -y docker.io
+# 1. Проверка root-доступа
+if [[ $EUID -ne 0 ]]; then
+  echo "❌ Этот скрипт должен запускаться от root"
+  exit 1
 fi
 
-# 2. Клонирование репозитория
-git clone https://github.com/egoistsar/docker-dante-srvr.git
+# 2. Установка зависимостей
+echo "🔧 Проверка и установка зависимостей..."
+
+apt update && apt install -y \
+  curl \
+  git \
+  docker.io \
+  sudo \
+  iptables \
+  systemd \
+  systemd-sysv \
+  net-tools
+
+# 3. Включение Docker
+systemctl enable docker
+systemctl start docker
+
+# 4. Клонирование репозитория
+if [ ! -d "docker-dante-srvr" ]; then
+  git clone https://github.com/egoistsar/docker-dante-srvr.git
+fi
 cd docker-dante-srvr
 
-# 3. Ввод переменных
+# 5. Ввод данных
 read -p "🛠 Введите порт для прокси-сервера: " PORT
 read -p "👤 Введите логин: " USERNAME
 read -s -p "🔑 Введите пароль: " PASSWORD
 echo
 
-# 4. Сохранение в config.env
-echo "PORT=$PORT" > config.env
-echo "USERNAME=$USERNAME" >> config.env
-echo "PASSWORD=$PASSWORD" >> config.env
+# 6. Сохранение параметров
+cat <<EOF > config.env
+PORT=$PORT
+USERNAME=$USERNAME
+PASSWORD=$PASSWORD
+EOF
 
-# 5. Сборка и запуск
+# 7. Сборка образа
 docker build -t dante-proxy .
+
+# 8. Запуск контейнера
+docker rm -f socks5 2>/dev/null || true
 docker run -d --restart=always --network host --env-file=config.env --name socks5 dante-proxy
 
-# 6. Установка systemd-сервиса
+# 9. Установка systemd-сервиса
 cp dante-docker.service /etc/systemd/system/
 systemctl daemon-reexec
 systemctl enable dante-docker
 systemctl start dante-docker
 
-echo "✅ Прокси-сервер запущен и будет автозапускаться при перезагрузке"
+echo "✅ Установка завершена: Dante SOCKS5 запущен и автозапускается при ребуте."
+echo "🔒 Логин: $USERNAME"
+echo "🔑 Пароль: (скрыт)"
+echo "📡 Порт: $PORT"
