@@ -49,6 +49,7 @@ EOF
 echo "📡 Разрешаю входящие соединения на порт $PORT..."
 iptables -I INPUT -p tcp --dport "$PORT" -j ACCEPT
 
+
 # 8. Сборка Docker-образа
 docker build -t dante-proxy .
 
