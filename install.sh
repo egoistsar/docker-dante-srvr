@@ -107,9 +107,14 @@ iptables -I INPUT -p tcp --dport "$PORT" -j ACCEPT || {
 # --- СБОРКА ---
 echo "🐳 Собираю Docker-образ..."
 DOCKER_BUILD_LOG=$(mktemp)
-docker build --no-cache -t dante-proxy-auto . >"$DOCKER_BUILD_LOG" 2>&1 || true
-if grep -q "apparmor_parser" "$DOCKER_BUILD_LOG"; then
-  echo "⚠️ AppArmor включён, но apparmor_parser не найден. Проблема проигнорирована."
+if ! docker build --no-cache -t dante-proxy-auto . >"$DOCKER_BUILD_LOG" 2>&1; then
+  if grep -q "apparmor_parser" "$DOCKER_BUILD_LOG"; then
+    echo "⚠️ AppArmor включён, но apparmor_parser не найден. Проблема проигнорирована."
+  fi
+  echo "❌ Ошибка при сборке Docker-образа:"
+  cat "$DOCKER_BUILD_LOG"
+  rm "$DOCKER_BUILD_LOG"
+  exit 1
 fi
 rm "$DOCKER_BUILD_LOG"
 
