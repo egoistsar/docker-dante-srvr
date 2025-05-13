@@ -8,6 +8,8 @@ bash
 Copy
 Edit
 curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/install.sh | bash -s -- --port 1341 --user test1 --pass test123456
+
+
 --port — порт для подключения к прокси
 
 --user — логин для подключения
