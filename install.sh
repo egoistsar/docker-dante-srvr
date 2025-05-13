@@ -46,6 +46,10 @@ USERNAME=$USERNAME
 PASSWORD=$PASSWORD
 EOF
 
+# 🔥 Firewall-проброс порта
+echo "📡 Разрешаю входящий трафик на порт $PORT через iptables..."
+iptables -I INPUT -p tcp --dport "$PORT" -j ACCEPT
+
 # 7. Сборка образа
 docker build -t dante-proxy .
 
