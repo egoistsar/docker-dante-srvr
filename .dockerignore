@@ -2,3 +2,8 @@ config.env
 danted.conf
 *.tar
 *.log
+.git
+.gitignore
+README.md
+LICENSE
+*.md

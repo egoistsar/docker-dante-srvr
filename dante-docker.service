@@ -1,6 +1,6 @@
 [Unit]
-Description=Dante Docker Container
-After=network.target docker.service
+Description=Dante SOCKS5 Docker Container
+After=network.target docker.service docker.socket
 Requires=docker.service
 
 [Service]

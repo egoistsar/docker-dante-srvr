@@ -109,9 +109,14 @@ echo "🐳 Сборка Docker-образа..."
 docker build --no-cache -t dante-proxy-auto .
 
 # --- ЗАПУСК ---
-echo "🚀 Запуск контейнера socks5..."
 docker rm -f socks5 2>/dev/null || true
-docker run -d --restart=always --network host --env-file=config.env --name socks5 dante-proxy-auto
+docker run -d \
+  --restart=always \
+  --network host \
+  --env-file=config.env \
+  --security-opt apparmor=unconfined \
+  --name socks5 \
+  dante-proxy-auto
 
 # --- SYSTEMD ---
 echo "🛠 Установка systemd-сервиса..."
@@ -138,7 +143,11 @@ echo
 echo "📄 Последние строки из логов socks5:"
 docker logs --tail 10 socks5 | sed 's/^/   /'
 echo "--------------------------------------"
+SERVER_IP=$(hostname -I | awk '{print $1}')
+# Финальный вывод:
 echo -e "\n✅ Установка завершена"
+echo "🌍 IP сервера: $SERVER_IP"
 echo "🟢 Прокси работает на порту: $PORT"
 echo "🔐 Логин: $USERNAME"
+echo "🔐 Логин: $PASSWORD"
 echo "📦 Контейнер: socks5"

@@ -4,9 +4,7 @@
 🚀 Быстрый старт
 Выполни одну команду на своём VPS (Ubuntu/Debian):
 
-bash
-Copy
-Edit
+
 curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/install.sh | bash -s -- --port 1341 --user test1 --pass test123456
 
 
@@ -19,18 +17,18 @@ curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/ins
 ✅ Проверка работоспособности
 Проверить, что прокси успешно запущен:
 
-bash
-Copy
-Edit
+
 docker ps -f name=socks5
 ss -tnlp | grep 1341
 docker logs socks5 --tail 10
+
+
+
 🧹 Удаление и очистка
 Чтобы полностью удалить всё, что установлено:
 
-bash
-Copy
-Edit
+
+
 docker rm -f socks5 2>/dev/null && \
 docker rmi -f dante-proxy-auto 2>/dev/null && \
 systemctl stop dante-docker 2>/dev/null && \
@@ -78,9 +76,7 @@ A production-ready SOCKS5 proxy based on Dante, deployed automatically inside a 
 🚀 Quick Start
 Run this one-liner on your VPS:
 
-bash
-Copy
-Edit
+
 curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/install.sh | bash -s -- --port 1341 --user test1 --pass test123456
 --port — the listening port of the proxy
 
@@ -91,20 +87,17 @@ curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/ins
 ✅ How to Check if It's Working
 Run the following checks:
 
-bash
-Copy
-Edit
+
 docker ps -f name=socks5
 ss -tnlp | grep 1341
 docker logs socks5 --tail 10
 You should see that the container is up and the port is being listened on.
 
+
 🧹 Full Cleanup (Uninstall)
 To completely remove the proxy, image, rules, configs and systemd unit:
 
-bash
-Copy
-Edit
+
 docker rm -f socks5 2>/dev/null && \
 docker rmi -f dante-proxy-auto 2>/dev/null && \
 systemctl stop dante-docker 2>/dev/null && \
@@ -114,6 +107,8 @@ systemctl daemon-reload && \
 iptables -D INPUT -p tcp --dport 1341 -j ACCEPT 2>/dev/null && \
 rm -rf ~/docker-dante-srvr ~/config.env && \
 echo '🧹 Cleaned up!'
+
+
 📦 Project Contents
 install.sh — auto-deployment script
 
