@@ -26,7 +26,7 @@ RUN apt-get update && \
 COPY entrypoint.sh /entrypoint.sh
 COPY danted.conf.template /etc/danted.conf.template
 
-RUN echo "disable" > /sys/module/apparmor/parameters/enabled || true
+# RUN echo "disable" > /sys/module/apparmor/parameters/enabled || true
 
 # Делаем скрипт исполняемым
 RUN chmod +x /entrypoint.sh
