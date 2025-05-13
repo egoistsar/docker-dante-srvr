@@ -1,3 +1,4 @@
+### install.sh
 #!/bin/bash
 
 set -e
@@ -82,6 +83,14 @@ if [ ! -d "docker-dante-srvr" ]; then
 fi
 cd docker-dante-srvr || exit 1
 
+# --- ПРОВЕРКА: обновлён ли Dockerfile ---
+echo "🔍 Проверка Dockerfile на наличие iproute2..."
+if ! grep -q "iproute2" Dockerfile; then
+  echo "⚠️ ВНИМАНИЕ: В Dockerfile отсутствует iproute2. Добавь его в RUN apt-get install"
+  echo "   Пример: apt-get install -y dante-server iproute2 gettext-base"
+  exit 1
+fi
+
 # --- СОХРАНЕНИЕ config.env ---
 echo "💾 Создаю config.env..."
 cat <<EOF > config.env
@@ -98,7 +107,7 @@ iptables -I INPUT -p tcp --dport "$PORT" -j ACCEPT || {
 
 # --- СБОРКА ---
 echo "🐳 Сборка Docker-образа..."
-docker build -t dante-proxy-auto .
+docker build --no-cache -t dante-proxy-auto .
 
 # --- ЗАПУСК ---
 echo "🚀 Запуск контейнера socks5..."
@@ -133,5 +142,4 @@ echo "--------------------------------------"
 echo -e "\n✅ Установка завершена"
 echo "🟢 Прокси работает на порту: $PORT"
 echo "🔐 Логин: $USERNAME"
-echo "🔐 Пароль: $PASSWORD"
 echo "📦 Контейнер: socks5"
