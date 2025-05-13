@@ -1,14 +1,20 @@
 #!/bin/bash
+set -e
 
-# Получение значений из ENV
-PORT=${PORT:-1080}
-USERNAME=${USERNAME:-proxy}
-PASSWORD=${PASSWORD:-123456}
+NET_IFACE=$(ip route get 1 | awk '{print $5; exit}')
+echo "🌐 Используем сетевой интерфейс: $NET_IFACE"
 
-echo "🔧 Запуск Dante SOCKS5 на порту $PORT для пользователя $USERNAME"
+export NET_IFACE
+export PORT=${PORT:-1080}
+export USERNAME=${USERNAME:-user}
+export PASSWORD=${PASSWORD:-pass}
 
-useradd -m "$USERNAME"
+# Генерация конфигурации
+envsubst < /etc/danted.conf.template > /etc/danted.conf
+
+# Добавление пользователя
+useradd -M -s /usr/sbin/nologin "$USERNAME" || true
 echo "$USERNAME:$PASSWORD" | chpasswd
 
-envsubst < /etc/danted.conf.template > /etc/danted.conf
+# Запуск
 exec danted -f /etc/danted.conf

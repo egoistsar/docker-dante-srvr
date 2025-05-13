@@ -1,4 +1,4 @@
-.git
-*.md
+config.env
+danted.conf
+*.tar
 *.log
-*.env
