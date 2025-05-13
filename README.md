@@ -27,17 +27,14 @@ docker logs socks5 --tail 10
 🧹 Удаление и очистка
 Чтобы полностью удалить всё, что установлено:
 
+Команда
+curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/cleanup.sh | bash
+
+или
+apt purge -y curl git docker.io sudo iptables net-tools && apt autoremove -y
+rm -rf /var/lib/docker /etc/systemd/system/docker.service.d
 
 
-docker rm -f socks5 2>/dev/null && \
-docker rmi -f dante-proxy-auto 2>/dev/null && \
-systemctl stop dante-docker 2>/dev/null && \
-systemctl disable dante-docker 2>/dev/null && \
-rm -f /etc/systemd/system/dante-docker.service && \
-systemctl daemon-reload && \
-iptables -D INPUT -p tcp --dport 1341 -j ACCEPT 2>/dev/null && \
-rm -rf ~/docker-dante-srvr ~/config.env && \
-echo '🧹 VPS очищен.'
 ⚙️ Состав проекта
 install.sh — автоматическая установка
 
@@ -97,16 +94,13 @@ You should see that the container is up and the port is being listened on.
 🧹 Full Cleanup (Uninstall)
 To completely remove the proxy, image, rules, configs and systemd unit:
 
+Comand
+curl -sSL https://raw.githubusercontent.com/egoistsar/docker-dante-srvr/main/cleanup.sh | bash
 
-docker rm -f socks5 2>/dev/null && \
-docker rmi -f dante-proxy-auto 2>/dev/null && \
-systemctl stop dante-docker 2>/dev/null && \
-systemctl disable dante-docker 2>/dev/null && \
-rm -f /etc/systemd/system/dante-docker.service && \
-systemctl daemon-reload && \
-iptables -D INPUT -p tcp --dport 1341 -j ACCEPT 2>/dev/null && \
-rm -rf ~/docker-dante-srvr ~/config.env && \
-echo '🧹 Cleaned up!'
+or
+
+apt purge -y curl git docker.io sudo iptables net-tools && apt autoremove -y
+rm -rf /var/lib/docker /etc/systemd/system/docker.service.d
 
 
 📦 Project Contents
