@@ -3,6 +3,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     dante-server \
+    apparmor apparmor-utils -y \
+    systemctl enable apparmor
+    systemctl start apparmor
     gettext-base \
     iproute2 && \
     if ! command -v ip > /dev/null; then \
